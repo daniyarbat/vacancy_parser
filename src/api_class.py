@@ -3,6 +3,7 @@ import requests
 from abc import ABC, abstractmethod
 from vacancy import Vacancy
 
+
 class AbstractApiClass(ABC):
     """
     Абстрактный класс для работы с API.
@@ -10,6 +11,7 @@ class AbstractApiClass(ABC):
     @abstractmethod
     def get_vacancies(self, *args):
         pass
+
 
 class BaseAPI(AbstractApiClass):
     """
@@ -34,6 +36,7 @@ class BaseAPI(AbstractApiClass):
     @abstractmethod
     def _parse_vacancies(self, data):
         pass
+
 
 class HeadHunterAPI(BaseAPI):
     """
@@ -63,3 +66,34 @@ class HeadHunterAPI(BaseAPI):
             except KeyError:
                 continue
         return hh_vacancies
+
+
+class SuperJobAPI(BaseAPI):
+    """
+    Класс для работы с api superjob
+    """
+    def __init__(self, city, keyword='python'):
+        api_url = "https://api.superjob.ru/2.0/vacancies/"
+        api_key = os.getenv('SJ_API_KEY')
+        headers = {'X-Api-App-Id': api_key}
+        params = {'keyword': keyword, 'town': city}
+        super().__init__(api_url, params)
+
+    def _parse_vacancies(self, data):
+        """
+        Метод для парсинга вакансий с сайта
+        """
+        sj_vacancies = []
+        for item in data.get('objects', []):
+            try:
+                vacancy = Vacancy(
+                    name=item['profession'],
+                    url=item['client']['link'],
+                    description=item['vacancyRichText'],
+                    salary_to=item.get('payment_to'),
+                    salary_from=item.get('payment_from')
+                )
+                sj_vacancies.append(vacancy)
+            except KeyError:
+                continue
+        return sj_vacancies
