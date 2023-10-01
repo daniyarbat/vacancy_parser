@@ -41,3 +41,14 @@ class Connector(AbsConnector):
                 if self.matches_criteria(vacancy, string):
                     vacancies.append(vacancy)
             return vacancies
+
+    def delete_vacancies(self, string):
+        """Считывает содержимое файла, удаляет вакансии из файла"""
+        with open(self.filename, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+
+        with open(self.filename, 'w', encoding='utf-8') as file:
+            for line in lines:
+                vacancy = json.loads(line)
+                if not self.matches_criteria(vacancy, string):
+                    file.write(line)
