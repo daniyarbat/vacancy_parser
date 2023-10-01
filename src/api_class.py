@@ -17,9 +17,10 @@ class BaseAPI(AbstractApiClass):
     """
     Базовый класс с общими параметрами для двух api классов
     """
-    def __init__(self, api_url, params):
+    def __init__(self, api_url, params, headers=None):
         self.api_url = api_url
         self.params = params
+        self.headers = headers
 
     def get_vacancies(self):
         """
@@ -27,7 +28,7 @@ class BaseAPI(AbstractApiClass):
         """
         try:
             response = requests.get(self.api_url, params=self.params)
-            response.raise_for_status()  # Проверка на ошибки HTTP
+            response.raise_for_status()
             data = response.json()
             return self._parse_vacancies(data)
         except requests.exceptions.RequestException as e:
@@ -54,13 +55,20 @@ class HeadHunterAPI(BaseAPI):
         hh_vacancies = []
         for item in data.get('items', []):
             salary = item.get('salary', {})
+            if salary:
+                salary_from = salary.get('from')
+                salary_to = salary.get('to')
+            else:
+                salary_from = None
+                salary_to = None
+
             try:
                 vacancy = Vacancy(
                     name=item['name'],
                     url=item['url'],
                     description=item['snippet']['requirement'],
-                    salary_to=salary.get('to'),
-                    salary_from=salary.get('from')
+                    salary_to=salary_to,
+                    salary_from=salary_from
                 )
                 hh_vacancies.append(vacancy)
             except KeyError:
@@ -77,7 +85,20 @@ class SuperJobAPI(BaseAPI):
         api_key = os.getenv('SJ_API_KEY')
         headers = {'X-Api-App-Id': api_key}
         params = {'keyword': keyword, 'town': city}
-        super().__init__(api_url, params)
+        super().__init__(api_url, params, headers)
+
+    def get_vacancies(self):
+        """
+        Метод для получения вакансий с сайта
+        """
+        try:
+            response = requests.get(self.api_url, params=self.params, headers=self.headers)
+            response.raise_for_status()  # Проверка на ошибки HTTP
+            data = response.json()
+            return self._parse_vacancies(data)
+        except requests.exceptions.RequestException as e:
+            raise Exception(f'Ошибка при запросе данных о вакансиях: {e}')
+
 
     def _parse_vacancies(self, data):
         """
