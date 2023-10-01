@@ -19,3 +19,25 @@ class AbsConnector(ABC):
     def delete_vacancies(self, criteria):
         pass
 
+
+class Connector(AbsConnector):
+    """Класс для работы с json-файлами."""
+
+    def __init__(self, filename: str):
+        self.filename = filename
+
+    def add_vacancy(self, vacancy):
+        """Открывает файл и добавляет новую вакансию в JSON-формате на отдельной строке"""
+        with open(self.filename, 'a', encoding='utf-8') as file:
+            json.dump(vacancy, file, ensure_ascii=False)
+            file.write('\n')
+
+    def get_vacancies(self, string):
+        """Считывает содержимое файла, парсит каждую строку вакансии из JSON-формата"""
+        with open(self.filename, 'r', encoding='utf-8') as file:
+            vacancies = []
+            for line in file:
+                vacancy = json.loads(line)
+                if self.matches_criteria(vacancy, string):
+                    vacancies.append(vacancy)
+            return vacancies
