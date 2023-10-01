@@ -27,3 +27,18 @@ def get_sorted_vacancies(filename: str):
     return sorted(vacancies, key=lambda x: x['name'])
 
 
+def get_vacancies_with_description(filename: str, keywords: list):
+    """Фильтрует вакансии, оставляя только те, у которых описание содержит заданные ключевые слова."""
+    vacancies = load_vacancies_from_file(filename)
+    filtered_vacancies = [vacancy for vacancy in vacancies
+                          if any(keyword.lower() in vacancy.get('description', '').lower() for keyword in keywords)]
+    return filtered_vacancies
+
+
+def format_vacancy(vacancy: dict):
+    """Форматирует информацию о вакансии в виде строки с указанием названия, ссылки, зарплаты (от и до), и описания."""
+    return f"Название: {vacancy['name']}\n" \
+           f"Ссылка: {vacancy['url']}\n" \
+           f"Зарплата от: {vacancy.get('salary_from', 'Не указана')}\n" \
+           f"Зарплата до: {vacancy.get('salary_to', 'Не указана')}\n" \
+           f"Описание: {vacancy.get('description', 'Отсутствует')}\n"
