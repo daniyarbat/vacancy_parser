@@ -27,28 +27,42 @@ class Connector(AbsConnector):
         self.filename = filename
 
     def add_vacancy(self, vacancy):
-        """Открывает файл и добавляет новую вакансию в JSON-формате на отдельной строке"""
+        """Добавляет новую вакансию в JSON-файл"""
         with open(self.filename, 'a', encoding='utf-8') as file:
             json.dump(vacancy, file, ensure_ascii=False)
             file.write('\n')
 
-    def get_vacancies(self, string):
-        """Считывает содержимое файла, парсит каждую строку вакансии из JSON-формата"""
-        with open(self.filename, 'r', encoding='utf-8') as file:
-            vacancies = []
-            for line in file:
-                vacancy = json.loads(line)
-                if self.matches_criteria(vacancy, string):
-                    vacancies.append(vacancy)
-            return vacancies
+    def read_json_file(self):
+        """Читает и возвращает содержимое JSON-файла в виде списка словарей"""
+        try:
+            with open(self.filename, 'r', encoding='utf-8') as file:
+                return [json.loads(line) for line in file]
+        except FileNotFoundError:
+            return []
 
-    def delete_vacancies(self, string):
-        """Считывает содержимое файла, удаляет вакансии из файла"""
-        with open(self.filename, 'r', encoding='utf-8') as file:
-            lines = file.readlines()
+    def get_vacancies(self, criteria):
+        """Возвращает список вакансий, удовлетворяющих заданным критериям"""
+        vacancies = self.read_json_file()
+        keywords = criteria.get('keywords', [])
+        return [vacancy for vacancy in vacancies
+                if any(keyword.lower() in vacancy['description'].lower() for keyword in keywords)]
+
+    def delete_vacancies(self, criteria):
+        """Удаляет вакансии из файла, удовлетворяющие заданным критериям"""
+        vacancies = self.read_json_file()
+        keywords = criteria.get('keywords', [])
+        vacancies_to_delete = [vacancy for vacancy in vacancies
+                               if any(keyword.lower() in vacancy['description'].lower() for keyword in keywords)]
 
         with open(self.filename, 'w', encoding='utf-8') as file:
-            for line in lines:
-                vacancy = json.loads(line)
-                if not self.matches_criteria(vacancy, string):
-                    file.write(line)
+            for vacancy in vacancies:
+                if vacancy not in vacancies_to_delete:
+                    json.dump(vacancy, file, ensure_ascii=False)
+                    file.write('\n')
+
+    @staticmethod
+    def get_top_n_vacancies(filename: str, n: int):
+        """Возвращает топ N вакансий с наивысшей зарплатой из JSON-файла"""
+        vacancies = Connector(filename).read_json_file()
+        sorted_vacancies = sorted(vacancies, key=lambda x: x.get('salary_from', 0), reverse=True)
+        return sorted_vacancies[:n]
