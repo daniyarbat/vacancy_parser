@@ -6,7 +6,9 @@ from .saver import JsonSaver
 class UserInteract():
 
     def user_interaction(self):
-        print("Добро пожаловать в программу по поиску вакансий!")
+        """
+        Метод для взаимодействия с пользователем
+        """
         city = input("Введите город для поиска: ")
         print("Выберите платформы для получения вакансий:")
         print("1. hh.ru")
@@ -67,4 +69,3 @@ class UserInteract():
                 break
             else:
                 print("Неправильный выбор. Попробуйте ещё раз.")
-
