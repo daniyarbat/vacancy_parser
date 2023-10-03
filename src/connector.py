@@ -59,10 +59,3 @@ class Connector(AbsConnector):
                 if vacancy not in vacancies_to_delete:
                     json.dump(vacancy, file, ensure_ascii=False)
                     file.write('\n')
-
-    @staticmethod
-    def get_top_n_vacancies(filename: str, n: int):
-        """Возвращает топ N вакансий с наивысшей зарплатой из JSON-файла"""
-        vacancies = Connector(filename).read_json_file()
-        sorted_vacancies = sorted(vacancies, key=lambda x: x.get('salary_from', 0), reverse=True)
-        return sorted_vacancies[:n]

@@ -1,9 +1,9 @@
 from .api_class import HeadHunterAPI, SuperJobAPI
-from .utils import get_sorted_vacancies, get_top_n_vacancies, get_vacancies_with_description, format_vacancy
+from .utils import get_sorted_vacancies, get_top_n_vacancies, get_vacancies_with_description
 from .saver import JsonSaver
 
 
-class UserInteract():
+class UserInteract:
 
     def user_interaction(self):
         """
@@ -48,23 +48,23 @@ class UserInteract():
             print("2. Получить вакансии в отсортированном виде")
             print("3. Получить вакансии с ключевыми словами в описании")
             print("4. Выход")
-            choice = input("Введите номер действия: ")
+            act_choice = input("Введите номер действия: ")
 
-            if choice == "1":
-                n = int(input("Введите количество вакансий для вывода в топ N: "))
-                top_vacancies = get_top_n_vacancies("all_vacancies.json", n)
+            if act_choice == "1":
+                vac_quantity = int(input("Введите количество вакансий для вывода в топ N: "))
+                top_vacancies = get_top_n_vacancies("all_vacancies.json", vac_quantity)
                 for vacancy in top_vacancies:
-                    print(format_vacancy(vacancy))
-            elif choice == "2":
+                    print(vacancy)
+            elif act_choice == "2":
                 sorted_vacancies = get_sorted_vacancies("all_vacancies.json")
                 for vacancy in sorted_vacancies:
-                    print(format_vacancy(vacancy))
-            elif choice == "3":
+                    print(vacancy)
+            elif act_choice == "3":
                 keywords = input("Введите ключевые слова через запятую: ")
                 vacancies_with_description = get_vacancies_with_description("all_vacancies.json", keywords)
                 for vacancy in vacancies_with_description:
-                    print(format_vacancy(vacancy))
-            elif choice == '4':
+                    print(vacancy)
+            elif act_choice == '4':
                 print("Завершена работа программы")
                 break
             else:
