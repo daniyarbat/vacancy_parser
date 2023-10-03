@@ -1,3 +1,4 @@
+from .vacancy import Vacancy
 import json
 
 
@@ -10,6 +11,20 @@ def load_vacancies_from_file(filename: str):
         return []
 
 
+def get_vacs(vacancies):
+    """
+    Принимает список словарей с данными о вакансиях и возвращает список экземпляров класса Vacancy.
+    """
+    all_vacancies = []
+    for vacancy in vacancies:
+        all_vacancies.append(Vacancy(name=vacancy["name"],
+                                     url=vacancy["url"],
+                                     salary_from=vacancy["salary_from"],
+                                     salary_to=vacancy["salary_to"],
+                                     description=vacancy["description"]))
+    return all_vacancies
+
+
 def get_top_n_vacancies(filename: str, n: int):
     """
     Сортирует вакансии по значению зарплаты от наивысшей до наименьшей,
@@ -18,27 +33,19 @@ def get_top_n_vacancies(filename: str, n: int):
     vacancies = load_vacancies_from_file(filename)
     sorted_vacancies = sorted(vacancies, key=lambda x: x.get('salary_from', 0) or 0, reverse=True)
     filtered_vacancies = [v for v in sorted_vacancies if v.get('salary_from') is not None and v.get('salary_from') > 0]
-    return filtered_vacancies[:n]
+    return get_vacs(filtered_vacancies[:n])
 
 
 def get_sorted_vacancies(filename: str):
     """Сортирует вакансии по имени (алфавитный порядок)."""
     vacancies = load_vacancies_from_file(filename)
-    return sorted(vacancies, key=lambda x: x['name'])
+    sorted_vacancies = sorted(vacancies, key=lambda x: x.get('name', ''))
+    return get_vacs(sorted_vacancies)
 
 
-def get_vacancies_with_description(filename: str, keywords: list):
+def get_vacancies_with_description(filename: str, keywords):
     """Фильтрует вакансии, оставляя только те, у которых описание содержит заданные ключевые слова."""
     vacancies = load_vacancies_from_file(filename)
     filtered_vacancies = [vacancy for vacancy in vacancies
                           if any(keyword.lower() in vacancy.get('description', '').lower() for keyword in keywords)]
-    return filtered_vacancies
-
-
-def format_vacancy(vacancy: dict):
-    """Форматирует информацию о вакансии в виде строки с указанием названия, ссылки, зарплаты (от и до), и описания."""
-    return f"Название: {vacancy['name']}\n" \
-           f"Ссылка: {vacancy['url']}\n" \
-           f"Зарплата от: {vacancy.get('salary_from', 'Не указана')}\n" \
-           f"Зарплата до: {vacancy.get('salary_to', 'Не указана')}\n" \
-           f"Описание: {vacancy.get('description', 'Отсутствует')}\n"
+    return get_vacs(filtered_vacancies)
