@@ -27,7 +27,5 @@ class JsonSaver:
                 'salary_from': vacancy.salary_from
             })
 
-        combined_data = existing_data + new_data
-
         with open(self.filename, 'w', encoding='utf-8') as file:
-            json.dump(combined_data, file, ensure_ascii=False, indent=4)
+            json.dump(new_data, file, ensure_ascii=False, indent=4)
