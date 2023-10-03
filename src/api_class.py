@@ -43,7 +43,7 @@ class HeadHunterAPI(BaseAPI):
     """
     Класс для работы с api hh.ru
     """
-    def __init__(self, area=1, text='python', per_page=10):
+    def __init__(self, area=1, text='python', per_page=100):
         api_url = 'https://api.hh.ru/vacancies'
         params = {'area': area, 'text': text, 'per_page': per_page}
         super().__init__(api_url, params)
@@ -65,7 +65,7 @@ class HeadHunterAPI(BaseAPI):
             try:
                 vacancy = Vacancy(
                     name=item['name'],
-                    url=item['url'],
+                    url=item['alternate_url'],
                     description=item['snippet']['requirement'],
                     salary_to=salary_to,
                     salary_from=salary_from
@@ -109,7 +109,7 @@ class SuperJobAPI(BaseAPI):
             try:
                 vacancy = Vacancy(
                     name=item['profession'],
-                    url=item['client']['link'],
+                    url=item['link'],
                     description=item['vacancyRichText'],
                     salary_to=item.get('payment_to'),
                     salary_from=item.get('payment_from')
